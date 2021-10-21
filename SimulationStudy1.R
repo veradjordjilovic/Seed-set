@@ -60,7 +60,7 @@ ordering <- order(as.numeric(c(seedset,resp)))
 param_t2 <- mu1[seedset]
 param_t2[seedset] <- lambda*param_t2[seedset]
 param_t3 <- as.matrix(S1[seedset,seedset])
-var_change <- rep(0.5,length(seedset)) #decrease variance by 50%
+var_change <- rep(0.5,length(seedset)) # decrease variance by 50%
 param_t3 <-diag(sqrt(var_change))%*%cov2cor(param_t3)%*%diag(sqrt(var_change))
 
 new_param <- fromMixedToCan(param_t2, param_t3,
@@ -83,10 +83,11 @@ S2 <- S2[ordering,ordering]
 # saveRDS(S2, file ="SimResults/S2StrongInt.rds")
 
 
-SimSeedSet <- function (n, mu1,S1,mu2,S2, B = 500, graph) {
-  # Wrapper function to perfrom the simulation study
+SimSeedSet <- function (n1, n2,  mu1,S1, mu2, S2, B = 500, graph) {
+  # Wrapper function to perform the simulation study
   # Input:
-  #   n... sample size 
+  #   n1... sample size of the first sample
+  #   n2... sample size of the second sample
   #   mu1... mean of the first condition
   #   S1... variance matrix of the first condition
   #   mu2, S2... mean and variance of the second condition
@@ -100,8 +101,8 @@ SimSeedSet <- function (n, mu1,S1,mu2,S2, B = 500, graph) {
   gsset <- matrix(0, nrow = B, ncol = length(mu1))
   colnames(gsset) <- nodes(graph)
   for (i in (1:B)) {
-    data.class1 <- rmvnorm(n, mean = mu1, sigma = S1)
-    data.class2 <- rmvnorm(n, mean = mu2, sigma = S2)
+    data.class1 <- rmvnorm(n1, mean = mu1, sigma = S1)
+    data.class2 <- rmvnorm(n2, mean = mu2, sigma = S2)
     data<-rbind(data.class1,data.class2)
     colnames(data)<-graph::nodes(graph)
     classes<-c(rep(1,nrow(data.class1)),rep(2,nrow(data.class2)))
@@ -155,12 +156,12 @@ tv[gseedset] <- 1
 tres <- list(t1,t2,t3,t4,t5,t6,t7,t8,t9)
 sapply(tres, function(temp){ sum(apply(temp, 1, function(x)identical(x,tv)))})
 
-# how many succesful recoveries of D_G under the null
+# how many successful recoveries of D_G under the null
 tvundernull <-rep(0,100)
 names(tvundernull) <- nodes(graph)
 tundernull <- list(t10, t11, t12)
 sapply(tundernull, function(temp){ sum(apply(temp, 1, function(x)identical(x,tvundernull)))})
 
 
-#check FWER control in general
+# check FWER control in general
 sapply(tres, function(temp){ sum(apply(temp, 1, function(x)sum(x[!(names(x)%in% gseedset)])>0) )})
